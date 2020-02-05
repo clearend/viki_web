@@ -128,6 +128,10 @@ public class UserController {
         return ApiResponse.success(list);
     }
 
+    /**
+     * 获取分类
+     * @return
+     */
     @RequestMapping(value = "getCategory",method = RequestMethod.POST)
     public Map getCategory(
     ){
