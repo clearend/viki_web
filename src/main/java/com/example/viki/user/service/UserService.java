@@ -4,9 +4,12 @@ package com.example.viki.user.service;
 import com.example.viki.category.CategoryImage;
 import com.example.viki.category.CategoryImageRepository;
 import com.example.viki.category.CategoryTypeRepository;
+import com.example.viki.category.SubCategoryTypeRepository;
+import com.example.viki.circle.Circle;
+import com.example.viki.circle.CircleRepository;
 import com.example.viki.dto.Category;
-import com.example.viki.goods.Goods;
-import com.example.viki.goods.GoodsRepository;
+import com.example.viki.dto.GoodsInfo;
+import com.example.viki.goods.*;
 import com.example.viki.hotgoods.HotGoods;
 import com.example.viki.hotgoods.HotGoodsRepository;
 import com.example.viki.scroller.ScrollerImage;
@@ -39,6 +42,24 @@ public class UserService {
 
     @Resource
     CategoryTypeRepository categoryTypeRepository;
+
+    @Resource
+    SubCategoryTypeRepository subCategoryTypeRepository;
+
+    @Resource
+    GoodsDetailRepository goodsDetailRepository;
+
+    @Resource
+    GoodsInfoRepository goodsInfoRepository;
+
+    @Resource
+    GoodsCommentsRepository goodsCommentsRepository;
+
+    @Resource
+    AdvertesPictureRepository advertesPictureRepository;
+
+    @Resource
+    CircleRepository circleRepository;
 
     public void register(String userId, String password) throws Exception {
         if(checkUserIdIsExist(userId)){
@@ -121,11 +142,6 @@ public class UserService {
 
     }
 
-    public List getGoods() {
-        List<Goods> list;
-        list = goodsRepository.findAll();
-        return list;
-    }
 
     public List getCategory() {
         List<Category> categoryList = new ArrayList<>();
@@ -168,5 +184,35 @@ public class UserService {
         categoryList.add(category3);
 
         return categoryList;
+    }
+
+    public List getGoods(Integer categoryId, Integer categorySubId, Integer page) {
+        List<Goods> goodsList;
+        List<Goods> goodsList1 = new ArrayList<>();
+        List<GoodsDetail> goodsDetailList = new ArrayList<>();
+        goodsList = goodsRepository.findAll();
+        String mallSubName = subCategoryTypeRepository.findBySubMallCategoryIdAndMallCategoryId(categorySubId,categoryId).getSubCategoryName();
+        for(Goods goods : goodsList){
+            if(goods.getMallCategoryId().equals(categoryId) && goods.getMallSubName() .equals(mallSubName))
+                goodsList1.add(goods);
+        }
+        int min = Math.min(page * 10, goodsList1.size());
+        for(int i=(page-1)*10;i<min;i++){
+            //goodsList2.add(goodsList1.get(i));
+            goodsDetailList.add(goodsDetailRepository.findByGoodsId(goodsList1.get(i).getMallSubId()));
+        }
+        return goodsDetailList;
+    }
+
+    public GoodsInfo getGoodsDetailById(String goodsId) {
+        GoodsInfo goodsInfo = new GoodsInfo();
+        goodsInfo.setGoodsInfo(goodsInfoRepository.findByGoodsId(goodsId));
+        goodsInfo.setGoodsComments(goodsCommentsRepository.findAll());
+        goodsInfo.setAdvertesPicture(advertesPictureRepository.findAll().get(0));
+        return goodsInfo;
+    }
+
+    public List<Circle> getCircle(Integer page) {
+        return circleRepository.findAll();
     }
 }

@@ -1,8 +1,10 @@
 package com.example.viki.user.controller;
 
 
+import com.example.viki.circle.Circle;
 import com.example.viki.common.ApiResponse;
 import com.example.viki.dto.Category;
+import com.example.viki.dto.GoodsInfo;
 import com.example.viki.goods.Goods;
 import com.example.viki.user.repository.User;
 import com.example.viki.user.service.UserService;
@@ -118,10 +120,13 @@ public class UserController {
      */
     @RequestMapping(value = "getGoods",method = RequestMethod.POST)
     public ApiResponse getGoods(
+            @RequestParam(value = "categoryId") Integer categoryId,
+            @RequestParam(value = "CategorySubId") Integer CategorySubId,
+            @RequestParam(value = "page") Integer page
     ){
         List list;
         try{
-            list = userService.getGoods();
+            list = userService.getGoods(categoryId,CategorySubId,page);
         }catch (Exception e){
             return ApiResponse.error(e.getMessage());
         }
@@ -148,5 +153,37 @@ public class UserController {
         map.put("data",list);
         //return ApiResponse.success(list);
         return map;
+    }
+
+
+    /**
+     * 通过id查找商品详情
+     * @param goodsId
+     * @return
+     */
+    @RequestMapping(value = "getGoodsDetailById",method = RequestMethod.POST)
+    public ApiResponse getGoodsInfo(
+            @RequestParam(value = "goodsId") String goodsId
+    ){
+        GoodsInfo goodsInfo ;
+        try{
+            goodsInfo = userService.getGoodsDetailById(goodsId);
+        }catch (Exception e){
+            return ApiResponse.error(e.getMessage());
+        }
+        return ApiResponse.success(goodsInfo);
+    }
+
+    @RequestMapping(value = "getCircle",method = RequestMethod.POST)
+    public ApiResponse getCircle(
+            @RequestParam(value = "page") Integer page
+    ){
+        List<Circle> circleList;
+        try{
+            circleList = userService.getCircle(page);
+        }catch (Exception e){
+            return ApiResponse.error(e.getMessage());
+        }
+        return ApiResponse.success(circleList);
     }
 }
